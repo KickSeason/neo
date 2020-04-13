@@ -13,15 +13,13 @@ jobs:
   Test:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@v1
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
     - name: Check format
       run: |
-        dotnet tool install --version 3.2.111002 --tool-path ./ dotnet-format --add-source https://dotnet.myget.org/F/format/api/v3/index.json
+        dotnet tool install -tool-path ./ dotnet-format
         ./dotnet-format --check --dry-run -v diagnostic
     - name: Test
       run: |

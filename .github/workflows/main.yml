@@ -13,6 +13,8 @@ jobs:
   Test:
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout	    - name: Checkout
+      uses: actions/checkout@v1
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:

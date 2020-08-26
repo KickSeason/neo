@@ -7,9 +7,8 @@ namespace Neo.Trie.MPT
 {
     public class HashNode : MPTNode
     {
-        public UInt256 Hash;
-
         protected override NodeType Type => NodeType.HashNode;
+        public UInt256 Hash;
         public override int Size => base.Size + (this.IsEmptyNode ? 1 : 33);
 
 

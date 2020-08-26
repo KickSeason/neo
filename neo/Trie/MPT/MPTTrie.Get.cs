@@ -49,11 +49,5 @@ namespace Neo.Trie.MPT
             value = default;
             return false;
         }
-
-
-
-
-
-
     }
 }

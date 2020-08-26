@@ -6,10 +6,9 @@ namespace Neo.Trie.MPT
 {
     public class LeafNode : MPTNode
     {
+        protected override NodeType Type => NodeType.LeafNode;
         public static readonly int MaxValueLength = 1024 * 1024;
         public byte[] Value;
-
-        protected override NodeType Type => NodeType.LeafNode;
         public override int Size => base.Size + Value.GetVarSize();
 
         public LeafNode()

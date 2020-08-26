@@ -16,8 +16,6 @@ namespace Neo.Trie.MPT
         public uint References;
         protected abstract NodeType Type { get; }
         private UInt256 hash;
-
-
         public virtual int Size => sizeof(NodeType);
         public bool IsEmptyNode => this is HashNode hn && hn.Hash is null;
 

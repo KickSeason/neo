@@ -7,17 +7,16 @@ namespace Neo.Trie.MPT
 {
     public class BranchNode : MPTNode
     {
+        protected override NodeType Type => NodeType.BranchNode;
         public const int ChildCount = 17;
         public MPTNode[] Children = new MPTNode[ChildCount];
-
-        protected override NodeType Type => NodeType.BranchNode;
         public override int Size => base.Size + Children.Sum(n => n.IsEmptyNode ? 1 : 33);
 
         public BranchNode()
         {
             for (int i = 0; i < ChildCount; i++)
             {
-                Children[i] = HashNode.EmptyNode;
+                Children[i] = MPTNode.EmptyNode;
             }
         }
 

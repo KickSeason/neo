@@ -1,6 +1,7 @@
 using Neo.IO;
 using Neo.Cryptography;
 using System.Collections.Generic;
+using static Neo.Helper;
 
 namespace Neo.Trie.MPT
 {

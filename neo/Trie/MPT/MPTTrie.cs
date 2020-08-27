@@ -13,7 +13,7 @@ namespace Neo.Trie.MPT
         public MPTTrie(UInt256 root, IKVStore store, bool allow_delete = false)
         {
             if (store is null)
-                throw new System.ArgumentNullException();
+                throw new System.ArgumentNullException(nameof(store));
 
             this.db = new MPTDb(store);
             this.allowDelete = allow_delete;

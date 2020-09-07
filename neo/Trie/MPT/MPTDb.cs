@@ -31,15 +31,14 @@ namespace Neo.Trie.MPT
             if (hash is null) return null;
             if (cache.TryGetValue(hash, out Trackable t))
             {
-                if (t.State == TrackState.Deleted) return null;
                 return MPTNode.DeserializeFromByteArray(t.RawNode);
             }
             var data = store.Get(hash.ToArray());
-            cache.Add(hash, new Trackable
+            cache[hash] = new Trackable
             {
                 RawNode = data,
                 State = TrackState.None,
-            });
+            };
             return MPTNode.DeserializeFromByteArray(data);
         }
 
@@ -49,31 +48,20 @@ namespace Neo.Trie.MPT
             {
                 throw new System.InvalidOperationException("Means nothing to store HashNode");
             }
-            if (cache.TryGetValue(node.GetHash(), out Trackable t))
-            {
-                t.RawNode = node.ToArrayWithReferences();
-                t.State = TrackState.Put;
-                return;
-            }
-            cache.Add(node.GetHash(), new Trackable
+            cache[node.GetHash()] = new Trackable
             {
                 RawNode = node.ToArrayWithReferences(),
                 State = TrackState.Put,
-            });
+            };
         }
 
         public void Delete(UInt256 hash)
         {
-            if (cache.TryGetValue(hash, out Trackable t))
-            {
-                t.State = TrackState.Deleted;
-                return;
-            }
-            cache.Add(hash, new Trackable
+            cache[hash] = new Trackable
             {
                 RawNode = null,
                 State = TrackState.Deleted,
-            });
+            };
         }
 
         public void Commit()

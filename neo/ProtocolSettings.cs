@@ -94,12 +94,9 @@ namespace Neo
             this.SecondsPerBlock = section.GetValue("SecondsPerBlock", 15u);
             this.StateRootEnableIndex = section.GetValue("StateRootEnableIndex", 0u);
             this.LowPriorityThreshold = Fixed8.Parse(section.GetValue("LowPriorityThreshold", "0.001"));
-<<<<<<< HEAD
             this.MinimumNetworkFee = Fixed8.Parse(section.GetValue("MinimumNetworkFee", "0"));
             this.FreeGasChangeHeight = section.GetValue("FreeGasChangeHeight", 100000000u);
-=======
             this.FullState = section.GetValue("FullState", false);
->>>>>>> 24990c3c... support only keep current state
         }
     }
 }

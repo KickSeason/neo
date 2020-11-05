@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Neo.Cryptography.MPT;
 using Neo.IO;
+using Neo.IO.Caching;
 using Neo.Persistence;
 using System;
 using System.Collections.Generic;
@@ -314,6 +315,67 @@ namespace Neo.UnitTests.Cryptography.MPT
 
             prefix = new byte[] { 0xac }; // =  FromNibbles(path = { 0x0a, 0x0c });
             results = mpt.Find(prefix).ToArray();
+            Assert.AreEqual(3, results.Count());
+        }
+
+        [TestMethod]
+        public void TestSeekDirectionExtensionNode()
+        {
+            var store = new MemoryStore();
+            var snapshot = store.GetSnapshot();
+            var trie = new MPTTrie<TestKey, TestValue>(snapshot, null);
+            Assert.IsTrue(trie.Put("1234ab".HexToBytes(), "aa".HexToBytes()));
+            Assert.IsTrue(trie.Put("1234cb".HexToBytes(), "aa".HexToBytes()));
+            var results = trie.Seek("1234".HexToBytes(), SeekDirection.Forward).ToArray();
+            Assert.AreEqual(2, results.Count());
+            results = trie.Seek("1234".HexToBytes(), SeekDirection.Backward).ToArray();
+            Assert.AreEqual(0, results.Count());
+            results = trie.Seek("12".HexToBytes(), SeekDirection.Forward).ToArray();
+            Assert.AreEqual(2, results.Count());
+            results = trie.Seek("12".HexToBytes(), SeekDirection.Backward).ToArray();
+            Assert.AreEqual(0, results.Count());
+            results = trie.Seek("11".HexToBytes(), SeekDirection.Forward).ToArray();
+            Assert.AreEqual(2, results.Count());
+            results = trie.Seek("11".HexToBytes(), SeekDirection.Backward).ToArray();
+            Assert.AreEqual(0, results.Count());
+            results = trie.Seek("1234b0".HexToBytes(), SeekDirection.Forward).ToArray();
+            Assert.AreEqual(1, results.Count());
+            results = trie.Seek("1234b0".HexToBytes(), SeekDirection.Backward).ToArray();
+            Assert.AreEqual(1, results.Count());
+            results = trie.Seek("1234d0".HexToBytes(), SeekDirection.Forward).ToArray();
+            Assert.AreEqual(0, results.Count());
+            results = trie.Seek("1234d0".HexToBytes(), SeekDirection.Backward).ToArray();
+            Assert.AreEqual(2, results.Count());
+            results = trie.Seek(new byte[0], SeekDirection.Forward).ToArray();
+            Assert.AreEqual(2, results.Count());
+            results = trie.Seek(new byte[0], SeekDirection.Backward).ToArray();
+            Assert.AreEqual(0, results.Count());
+        }
+
+        [TestMethod]
+        public void TestSeekDirectionBranchNode()
+        {
+            var store = new MemoryStore();
+            var snapshot = store.GetSnapshot();
+            var trie = new MPTTrie<TestKey, TestValue>(snapshot, null);
+            Assert.IsTrue(trie.Put("00".HexToBytes(), "aa".HexToBytes()));
+            Assert.IsTrue(trie.Put("0010".HexToBytes(), "aa".HexToBytes()));
+            Assert.IsTrue(trie.Put("00a0".HexToBytes(), "aa".HexToBytes()));
+            var results = trie.Seek("00".HexToBytes(), SeekDirection.Forward).ToArray();
+            Assert.AreEqual(3, results.Count());
+            results = trie.Seek("00".HexToBytes(), SeekDirection.Backward).ToArray();
+            Assert.AreEqual(1, results.Count());
+            results = trie.Seek("0070".HexToBytes(), SeekDirection.Forward).ToArray();
+            Assert.AreEqual(1, results.Count());
+            results = trie.Seek("0070".HexToBytes(), SeekDirection.Backward).ToArray();
+            Assert.AreEqual(2, results.Count());
+            results = trie.Seek("0010".HexToBytes(), SeekDirection.Forward).ToArray();
+            Assert.AreEqual(2, results.Count());
+            results = trie.Seek("0010".HexToBytes(), SeekDirection.Backward).ToArray();
+            Assert.AreEqual(2, results.Count());
+            results = trie.Seek("00a0".HexToBytes(), SeekDirection.Forward).ToArray();
+            Assert.AreEqual(1, results.Count());
+            results = trie.Seek("00a0".HexToBytes(), SeekDirection.Backward).ToArray();
             Assert.AreEqual(3, results.Count());
         }
     }

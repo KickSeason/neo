@@ -55,6 +55,14 @@ namespace Neo.IO.Data.LevelDB
             }
         }
 
+        public int MaxFileSize
+        {
+            set
+            {
+                Native.leveldb_options_set_max_file_size(handle, (UIntPtr)value);
+            }
+        }
+
         public int BlockRestartInterval
         {
             set

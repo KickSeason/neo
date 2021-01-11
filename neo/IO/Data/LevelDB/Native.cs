@@ -167,6 +167,9 @@ namespace Neo.IO.Data.LevelDB
 
         [DllImport("libleveldb", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
         public static extern void leveldb_options_set_filter_policy(IntPtr /*Options*/ options, IntPtr /*FilterPolicy*/ policy);
+
+        [DllImport("libleveldb", CharSet = CharSet.Ansi, CallingConvention = CallingConvention.Cdecl)]
+        public static extern void leveldb_options_set_max_file_size(IntPtr /*Options*/ options, UIntPtr size);
         #endregion
 
         #region ReadOptions

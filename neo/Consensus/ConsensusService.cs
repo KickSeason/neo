@@ -61,9 +61,10 @@ namespace Neo.Consensus
 
         private bool AddTransaction(Transaction tx, bool verify)
         {
-            if (verify && !tx.Verify(context.Snapshot, context.Transactions.Values))
+            if (verify && !tx.Verify(context.Snapshot, context.Transactions.Values, true))
             {
                 Log($"Invalid transaction: {tx.Hash}{Environment.NewLine}{tx.ToArray().ToHexString()}", LogLevel.Warning);
+                Logger.Write(nameof(ConsensusService), $"Height: {context.BlockIndex}, Invalid transaction: {tx.Hash}{Environment.NewLine}{tx.ToArray().ToHexString()}");
                 RequestChangeView();
                 return false;
             }

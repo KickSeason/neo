@@ -57,9 +57,9 @@ namespace Neo.Network.P2P.Payloads
             return json;
         }
 
-        public override bool Verify(Snapshot snapshot, IEnumerable<Transaction> mempool)
+        public override bool Verify(Snapshot snapshot, IEnumerable<Transaction> mempool, bool log = false)
         {
-            if (!base.Verify(snapshot, mempool)) return false;
+            if (!base.Verify(snapshot, mempool, log)) return false;
             if (Claims.Length != Claims.Distinct().Count())
                 return false;
             if (mempool.OfType<ClaimTransaction>().Where(p => p != this).SelectMany(p => p.Claims).Intersect(Claims).Count() > 0)

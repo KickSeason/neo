@@ -267,7 +267,7 @@ namespace Neo.Network.P2P.Payloads
             return Verify(snapshot, Enumerable.Empty<Transaction>());
         }
 
-        public virtual bool Verify(Snapshot snapshot, IEnumerable<Transaction> mempool)
+        public virtual bool Verify(Snapshot snapshot, IEnumerable<Transaction> mempool, bool log = false)
         {
             if (Size > MaxTransactionSize) return false;
             for (int i = 1; i < Inputs.Length; i++)
@@ -275,9 +275,15 @@ namespace Neo.Network.P2P.Payloads
                     if (Inputs[i].PrevHash == Inputs[j].PrevHash && Inputs[i].PrevIndex == Inputs[j].PrevIndex)
                         return false;
             if (mempool.Where(p => p != this).SelectMany(p => p.Inputs).Intersect(Inputs).Count() > 0)
+            {
+                Logger.Write(nameof(Transaction), $"Double spend with mempool");
                 return false;
+            }
             if (snapshot.IsDoubleSpend(this))
+            {
+                Logger.Write(nameof(Transaction), $"Double spend with persisted tx");
                 return false;
+            }
             foreach (var group in Outputs.GroupBy(p => p.AssetId))
             {
                 AssetState asset = snapshot.Assets.TryGet(group.Key);
@@ -289,7 +295,11 @@ namespace Neo.Network.P2P.Payloads
                         return false;
             }
             TransactionResult[] results = GetTransactionResults()?.ToArray();
-            if (results == null) return false;
+            if (results == null)
+            {
+                Logger.Write(nameof(Transaction), $"Invalid references");
+                return false;
+            }
             TransactionResult[] results_destroy = results.Where(p => p.Amount > Fixed8.Zero).ToArray();
             if (results_destroy.Length > 1) return false;
             if (results_destroy.Length == 1 && results_destroy[0].AssetId != Blockchain.UtilityToken.Hash)

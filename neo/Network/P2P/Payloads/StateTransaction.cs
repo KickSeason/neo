@@ -83,12 +83,12 @@ namespace Neo.Network.P2P.Payloads
             return json;
         }
 
-        public override bool Verify(Snapshot snapshot, IEnumerable<Transaction> mempool)
+        public override bool Verify(Snapshot snapshot, IEnumerable<Transaction> mempool, bool log = false)
         {
             foreach (StateDescriptor descriptor in Descriptors)
                 if (!descriptor.Verify(snapshot))
                     return false;
-            return base.Verify(snapshot, mempool);
+            return base.Verify(snapshot, mempool, log);
         }
     }
 }

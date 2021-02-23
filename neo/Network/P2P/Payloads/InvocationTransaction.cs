@@ -61,11 +61,15 @@ namespace Neo.Network.P2P.Payloads
             return json;
         }
 
-        public override bool Verify(Snapshot snapshot, IEnumerable<Transaction> mempool)
+        public override bool Verify(Snapshot snapshot, IEnumerable<Transaction> mempool, bool log = false)
         {
             if (Gas.GetData() % 100000000 != 0) return false;
-            if (References is null || NetworkFee < ProtocolSettings.Default.MinimumNetworkFee) return false;
-            return base.Verify(snapshot, mempool);
+            if (References is null || NetworkFee < ProtocolSettings.Default.MinimumNetworkFee)
+            {
+                Logger.Write(nameof(InvocationTransaction), "Insufficient minimum network fee");
+                return false;
+            }
+            return base.Verify(snapshot, mempool, log);
         }
     }
 }

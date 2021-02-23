@@ -90,7 +90,7 @@ namespace Neo.Network.P2P.Payloads
             return json;
         }
 
-        public override bool Verify(Snapshot snapshot, IEnumerable<Transaction> mempool)
+        public override bool Verify(Snapshot snapshot, IEnumerable<Transaction> mempool, bool log = false)
         {
             return false;
         }

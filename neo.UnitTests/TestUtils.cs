@@ -109,7 +109,7 @@ namespace Neo.UnitTests
             {
                 CallBase = true
             };
-            mockTx.Setup(p => p.Verify(It.IsAny<Snapshot>(), It.IsAny<IEnumerable<Transaction>>())).Returns(true);
+            mockTx.Setup(p => p.Verify(It.IsAny<Snapshot>(), It.IsAny<IEnumerable<Transaction>>(), It.IsAny<bool>())).Returns(true);
             var tx = mockTx.Object;
             var randomBytes = new byte[16];
             TestRandom.NextBytes(randomBytes);

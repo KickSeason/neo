@@ -42,9 +42,9 @@ namespace Neo.Network.P2P.Payloads
             return hashes.OrderBy(p => p).ToArray();
         }
 
-        public override bool Verify(Snapshot snapshot, IEnumerable<Transaction> mempool)
+        public override bool Verify(Snapshot snapshot, IEnumerable<Transaction> mempool, bool log = false)
         {
-            if (!base.Verify(snapshot, mempool)) return false;
+            if (!base.Verify(snapshot, mempool, log)) return false;
             TransactionResult[] results = GetTransactionResults()?.Where(p => p.Amount < Fixed8.Zero).ToArray();
             if (results == null) return false;
             foreach (TransactionResult r in results)

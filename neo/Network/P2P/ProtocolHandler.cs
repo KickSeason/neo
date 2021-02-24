@@ -159,6 +159,7 @@ namespace Neo.Network.P2P
 
         private void OnAddrMessageReceived(AddrPayload payload)
         {
+            Counter.Increase("addr");
             system.LocalNode.Tell(new Peer.Peers
             {
                 EndPoints = payload.AddressList.Select(p => p.EndPoint)
@@ -182,12 +183,14 @@ namespace Neo.Network.P2P
             }
             if (state_roots.Count == 0) return;
             StateRootSentIndex += (uint)(start_index + state_roots.Count);
+            Counter.Increase("getstateroot", state_roots.Count);
             Context.Parent.Tell(Message.Create("roots", StateRootsPayload.Create(state_roots.ToArray())));
         }
 
         private void OnStateRootsReceived(StateRootsPayload payload)
         {
             if (payload.StateRoots.Length == 0) return;
+            Counter.Increase("stateroots", payload.StateRoots.Length);
             system.Blockchain.Tell(payload.StateRoots, Context.Parent);
         }
 
@@ -195,18 +198,21 @@ namespace Neo.Network.P2P
         {
             if (bloom_filter != null)
                 bloom_filter.Add(payload.Data);
+            Counter.Increase("filteraddr");
         }
 
         private void OnFilterClearMessageReceived()
         {
             bloom_filter = null;
             Context.Parent.Tell(new SetFilter { Filter = null });
+            Counter.Increase("filterclear");
         }
 
         private void OnFilterLoadMessageReceived(FilterLoadPayload payload)
         {
             bloom_filter = new BloomFilter(payload.Filter.Length * 8, payload.K, payload.Tweak, payload.Filter);
             Context.Parent.Tell(new SetFilter { Filter = bloom_filter });
+            Counter.Increase("filterload");
         }
 
         private void OnGetAddrMessageReceived()
@@ -219,6 +225,7 @@ namespace Neo.Network.P2P
                 .Take(AddrPayload.MaxCountToSend);
             NetworkAddressWithTime[] networkAddresses = peers.Select(p => NetworkAddressWithTime.Create(p.Listener, p.Version.Services, p.Version.Timestamp)).ToArray();
             if (networkAddresses.Length == 0) return;
+            Counter.Increase("getaddr");
             Context.Parent.Tell(Message.Create("addr", AddrPayload.Create(networkAddresses)));
         }
 
@@ -240,12 +247,14 @@ namespace Neo.Network.P2P
                 hashes.Add(hash);
             }
             if (hashes.Count == 0) return;
+            Counter.Increase("getblocks", hashes.Count);
             Context.Parent.Tell(Message.Create("inv", InvPayload.Create(InventoryType.Block, hashes.ToArray())));
         }
 
         private void OnGetDataMessageReceived(InvPayload payload)
         {
             UInt256[] hashes = payload.Hashes.Where(p => sentHashes.Add(p)).ToArray();
+            Counter.Increase($"getdata.{payload.Type}", hashes.Length);
             foreach (UInt256 hash in hashes)
             {
                 Blockchain.Singleton.RelayCache.TryGet(hash, out IInventory inventory);
@@ -300,12 +309,14 @@ namespace Neo.Network.P2P
                 headers.Add(header);
             }
             if (headers.Count == 0) return;
+            Counter.Increase("getheaders", headers.Count);
             Context.Parent.Tell(Message.Create("headers", HeadersPayload.Create(headers)));
         }
 
         private void OnHeadersMessageReceived(HeadersPayload payload)
         {
             if (payload.Headers.Length == 0) return;
+            Counter.Increase("headers", 1);
             system.Blockchain.Tell(payload.Headers, Context.Parent);
         }
 
@@ -316,6 +327,7 @@ namespace Neo.Network.P2P
             system.LocalNode.Tell(new LocalNode.Relay { Inventory = inventory });
             pendingKnownHashes.Remove(inventory.Hash);
             knownHashes.Add(inventory.Hash);
+            Counter.Increase($"{inventory.InventoryType}");
         }
 
         private void OnInvMessageReceived(InvPayload payload)
@@ -336,23 +348,27 @@ namespace Neo.Network.P2P
             if (hashes.Length == 0) return;
             foreach (UInt256 hash in hashes)
                 pendingKnownHashes.Add((hash, DateTime.UtcNow));
+            Counter.Increase($"inv.{payload.Type}", hashes.Length);
             system.TaskManager.Tell(new TaskManager.NewTasks { Payload = InvPayload.Create(payload.Type, hashes) }, Context.Parent);
         }
 
         private void OnMemPoolMessageReceived()
         {
+            Counter.Increase("mempool");
             foreach (InvPayload payload in InvPayload.CreateGroup(InventoryType.TX, Blockchain.Singleton.MemPool.GetVerifiedTransactions().Select(p => p.Hash).ToArray()))
                 Context.Parent.Tell(Message.Create("inv", payload));
         }
 
         private void OnPingMessageReceived(PingPayload payload)
         {
+            Counter.Increase("ping");
             Context.Parent.Tell(payload);
             Context.Parent.Tell(Message.Create("pong", PingPayload.Create(Blockchain.Singleton.Height, payload.Nonce)));
         }
 
         private void OnPongMessageReceived(PingPayload payload)
         {
+            Counter.Increase("pong");
             Context.Parent.Tell(payload);
         }
 

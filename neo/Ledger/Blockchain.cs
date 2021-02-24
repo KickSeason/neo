@@ -657,6 +657,7 @@ namespace Neo.Ledger
             PersistLocalStateRoot();
             UpdateCurrentSnapshot();
             OnPersistCompleted(block);
+            Counter.Reset();
         }
 
         protected override void PostStop()
